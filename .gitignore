@@ -1,0 +1,9 @@
+# Temp documentation
+doom_bible.md
+doom_python.md
+
+# Wad files
+*.Wad
+
+# VENV
+.venv/
