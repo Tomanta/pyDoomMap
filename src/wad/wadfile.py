@@ -19,4 +19,17 @@ class WadHeader:
 
 class WadReader:
     def __init__(self, wadfile: str):
-        self.wadfile = wadfile
+        self._filename: str = wadfile
+        self._header: WadHeader = None
+        self._waddata: bytes = None
+
+        self._load_wad_data()
+        self._read_header()
+
+    def _load_wad_data(self):
+        with open(self._filename, 'rb') as wad_file:
+            self._waddata = wad_file.read()
+
+    def _read_header(self):
+        wad_type, num_lumps, directory_offset = struct.unpack_from(WAD_HEADER_LAYOUT, self._waddata,0)
+        self._header = WadHeader(wad_type.decode('ascii'), num_lumps, directory_offset)
