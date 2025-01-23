@@ -16,3 +16,9 @@ class Linedef:
     tag: int
     front_sidedef: int
     back_sidedef: int
+
+class Map():
+    def __init__(self, name: str, vertexes: list, linedefs: list):
+        self.name = name
+        self.vertexes = vertexes
+        self.linedefs = linedefs
