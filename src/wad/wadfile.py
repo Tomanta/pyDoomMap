@@ -1,6 +1,7 @@
 from typing import Final
 import struct
 from dataclasses import dataclass
+import re
 
 
 # All layouts are read in little endian
@@ -21,6 +22,7 @@ class DirectoryEntry:
     filepos: int
     size: int
     name: str
+    type: str = 'Unknown' # TODO: Good chance to play with Enums?
 
 class WadReader:
     def __init__(self, wadfile: str):
@@ -31,6 +33,7 @@ class WadReader:
 
         self._load_wad_data()
         self._read_header()
+        self._read_directory()
 
     def _load_wad_data(self):
         with open(self._filename, 'rb') as wad_file:
@@ -44,5 +47,19 @@ class WadReader:
         for i in range(0, self._header.numlumps):
             filepos, size, name = struct.unpack_from(DIRECTORY_LAYOUT, self._waddata, self._header.directory_offset + (i*16))
             name = name.decode('ascii').strip('\x00') # Convert name and strip trailing NULL characters
-            entry = DirectoryEntry(filepos, size, name)
+
+            match name:
+                case 'VERTEX':
+                    type = 'map-vertex'
+                case 'LINEDEF':
+                    type = 'map-linedef'
+                case _:
+                    if len(name) > 3 and name[3] == 'MAP':
+                        type = 'map'
+                    elif len(name) > 2 and name[0] == 'E' and name[2] == 'M':
+                        type = 'map'
+                    else:
+                        type = 'unknown'
+            
+            entry = DirectoryEntry(filepos, size, name, type)
             self._directory.append(entry)
