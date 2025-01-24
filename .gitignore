@@ -5,6 +5,10 @@ doom_python.md
 # Wad files
 *.Wad
 
+# Exports
+
+export/
+
 # VENV
 .venv/
 

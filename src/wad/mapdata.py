@@ -35,3 +35,14 @@ class Map:
                 min_y = v.y
 
         return (abs(min_x), abs(min_y))
+
+    def get_limits(self):
+        offset_x, offset_y = self.get_offsets()
+        max_x = 0
+        max_y = 0
+        for v in self.vertexes:
+            if v.x > max_x:
+                max_x = v.x
+            if v.y > max_y:
+                max_y = v.y
+        return (max_x + offset_x, max_y + offset_y)
