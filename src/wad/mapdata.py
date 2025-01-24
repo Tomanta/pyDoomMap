@@ -17,8 +17,21 @@ class Linedef:
     front_sidedef: int
     back_sidedef: int
 
-class Map():
+
+class Map:
     def __init__(self, name: str, vertexes: list, linedefs: list):
         self.name = name
         self.vertexes = vertexes
         self.linedefs = linedefs
+
+    def get_offsets(self):
+        """Vertexes can be negative, this returns an offset that can be added to every vertex to adjust them to a 0-based grid."""
+        min_x = 0
+        min_y = 0
+        for v in self.vertexes:
+            if v.x < min_x:
+                min_x = v.x
+            if v.y < min_y:
+                min_y = v.y
+
+        return (abs(min_x), abs(min_y))
