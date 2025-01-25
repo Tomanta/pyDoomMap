@@ -22,7 +22,9 @@ def test_map_creation():
     name = "E1M1"
     vertexes = [Vertex(-30, 30), Vertex(-15, 0), Vertex(30, 27), Vertex(18, 92)]
     linedefs = [Linedef(0, 1, 14, 123, 12, 1, 0)]
-    map = Map(name, vertexes, linedefs)
+    sidedefs = []
+    sectors = []
+    map = Map(name, vertexes, linedefs, sidedefs, sectors)
     assert map.name == name
     assert map.vertexes == vertexes
     assert map.linedefs == linedefs
@@ -32,7 +34,9 @@ def test_map_get_offsets():
     name = "E1M1"
     vertexes = [Vertex(-30, 30), Vertex(-15, 0), Vertex(30, 27), Vertex(18, 92)]
     linedefs = [Linedef(0, 1, 14, 123, 12, 1, 0)]
-    map = Map(name, vertexes, linedefs)
+    sidedefs = []
+    sectors = []
+    map = Map(name, vertexes, linedefs, sidedefs, sectors)
     offsets = map.get_offsets()
     assert offsets[0] == 30
     assert offsets[1] == 0

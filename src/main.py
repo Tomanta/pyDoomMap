@@ -28,6 +28,19 @@ def export_map(wadfile, mapname, export_file):
     image = ImageDraw.Draw(out)
 
     for line in d_map.get_lines(use_offsets=True, padding=100):
+        if line.type == "hidden":
+            continue
+
+        match line.type:
+            case "floor-diff":
+                color = "rgb(188,120,72)"
+            case "ceil-diff":
+                color = "rgb(252,252,0)"
+            case "one-sided":
+                color = "rgb(252,0,0)"
+            case _:
+                color = "rgb(128,128,128)"
+
         image.line(
             [
                 line.start_vertex[0],
@@ -35,7 +48,7 @@ def export_map(wadfile, mapname, export_file):
                 line.end_vertex[0],
                 img_size_y - 1 - line.end_vertex[1],
             ],
-            fill="rgb(255,255,255)",
+            fill=color,
             width=5,
         )
 

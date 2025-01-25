@@ -1,4 +1,19 @@
 from dataclasses import dataclass
+from enum import IntFlag
+
+# ZDDoom source for automap: https://github.com/ZDoom/gzdoom/blob/master/src/am_map.cpp
+
+
+class LdFlags(IntFlag):
+    ML_BLOCKING = 1
+    ML_BLOCKMONSTERS = 2
+    ML_TWOSIDED = 4
+    ML_DONTPEGSTOP = 8
+    ML_DONTPEGBOTTOM = 16
+    ML_SECRET = 32
+    ML_SOUNDBLOCK = 64
+    ML_DONTDRAW = 128
+    ML_MAPPED = 256
 
 
 @dataclass
@@ -25,11 +40,36 @@ class Line:
     type: str
 
 
+@dataclass
+class Sidedef:
+    x_offset: int
+    y_offset: int
+    upper_texture: str
+    lower_texture: str
+    middle_texture: str
+    sector_number: int
+
+
+@dataclass
+class Sector:
+    fl_height: int
+    cl_height: int
+    fl_texture: str
+    cl_texture: str
+    light_level: int
+    special_type: int
+    tag_number: int
+
+
 class Map:
-    def __init__(self, name: str, vertexes: list, linedefs: list):
+    def __init__(
+        self, name: str, vertexes: list, linedefs: list, sidedefs: list, sectors: list
+    ):
         self.name = name
         self.vertexes = vertexes
         self.linedefs = linedefs
+        self.sidedefs = sidedefs
+        self.sectors = sectors
 
     def get_offsets(self):
         """Vertexes can be negative, this returns an offset that can be added to every vertex to adjust them to a 0-based grid."""
@@ -56,6 +96,32 @@ class Map:
         for linedef in self.linedefs:
             start = self.vertexes[linedef.start_vertex]
             end = self.vertexes[linedef.end_vertex]
+
+            #if linedef.flags & LdFlags.ML_DONTDRAW:
+            #    type = "hidden"
+            if linedef.front_sidedef == -1 or linedef.back_sidedef == -1:
+                type = "one-sided"
+            elif (
+                self.sectors[
+                    self.sidedefs[linedef.front_sidedef].sector_number
+                ].fl_height
+                != self.sectors[
+                    self.sidedefs[linedef.back_sidedef].sector_number
+                ].fl_height
+            ):
+                type = "floor-diff"
+            elif (
+                self.sectors[
+                    self.sidedefs[linedef.front_sidedef].sector_number
+                ].cl_height
+                != self.sectors[
+                    self.sidedefs[linedef.back_sidedef].sector_number
+                ].cl_height
+            ):
+                type = "ceil-diff"
+            elif linedef.flags & LdFlags.ML_SECRET:
+                type = "one-sided"
+
             lines.append(
                 Line(
                     start_vertex=(
