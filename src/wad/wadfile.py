@@ -1,7 +1,7 @@
 from typing import Final
 import struct
 from dataclasses import dataclass
-from .mapdata import Vertex, Linedef, Map, Sidedef, Sector
+from .mapdata import Vertex, Linedef, Map, Sidedef, Sector, Thing
 
 # All layouts are read in little endian
 WAD_HEADER_LAYOUT: Final[str] = "<4s i i"  # 4 character string and two signed ints
@@ -10,6 +10,7 @@ VERTEX_LAYOUT: Final[str] = "<h h"  # two signed short ints
 LINEDEF_LAYOUT: Final[str] = "<h h h h h h h"  # 8 signed short ints
 SIDEDEF_LAYOUT: Final[str] = "<h h 8s 8s 8s h"
 SECTOR_LAYOUT: Final[str] = "<h h 8s 8s h h h"
+THING_LAYOUT: Final[str] = "<h h h h h"
 
 
 @dataclass
@@ -63,6 +64,7 @@ class WadReader:
                             current_map["linedefs"],
                             current_map["sidedefs"],
                             current_map["sectors"],
+                            current_map["things"],
                         )
                         self.maps[current_map["name"]] = new_map
                         current_map = {
@@ -71,6 +73,7 @@ class WadReader:
                             "linedefs": [],
                             "sidedefs": [],
                             "sectors": [],
+                            "things": [],
                         }
                     else:
                         current_map = {
@@ -79,6 +82,7 @@ class WadReader:
                             "linedefs": [],
                             "sidedefs": [],
                             "sectors": [],
+                            "things": [],
                         }
                         reading_map = True
                 case "map-vertex":
@@ -86,7 +90,7 @@ class WadReader:
                 case "map-linedef":
                     current_map["linedefs"] = self.read_linedef(lump)
                 case "map-thing":
-                    pass
+                    current_map["things"] = self.read_thing(lump)
                 case "map-seg":
                     pass
                 case "map-ssector":
@@ -111,6 +115,7 @@ class WadReader:
                             current_map["linedefs"],
                             current_map["sidedefs"],
                             current_map["sectors"],
+                            current_map["things"],
                         )
                         self.maps[current_map["name"]] = new_map
                         reading_map = False
@@ -124,6 +129,15 @@ class WadReader:
             vertexes.append(Vertex(x, y))
 
         return vertexes
+
+    def read_thing(self, lump):
+        things = []
+        for i in range(0, lump.size // 10):
+            x, y, angle, type, flags = struct.unpack_from(
+                THING_LAYOUT, self._waddata, lump.filepos + (i * 10)
+            )
+            things.append(Thing(x, y, angle, type, flags))
+        return things
 
     def read_sector(self, lump):
         sectors = []

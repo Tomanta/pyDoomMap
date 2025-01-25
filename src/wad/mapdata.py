@@ -17,6 +17,15 @@ class LdFlags(IntFlag):
 
 
 @dataclass
+class Thing:
+    x_pos: int
+    y_post: int
+    angle: int
+    type: int
+    flags: int
+
+
+@dataclass
 class Vertex:
     x: int
     y: int
@@ -63,13 +72,20 @@ class Sector:
 
 class Map:
     def __init__(
-        self, name: str, vertexes: list, linedefs: list, sidedefs: list, sectors: list
+        self,
+        name: str,
+        vertexes: list,
+        linedefs: list,
+        sidedefs: list,
+        sectors: list,
+        things: list,
     ):
         self.name = name
         self.vertexes = vertexes
         self.linedefs = linedefs
         self.sidedefs = sidedefs
         self.sectors = sectors
+        self.things = things
 
     def get_offsets(self):
         """Vertexes can be negative, this returns an offset that can be added to every vertex to adjust them to a 0-based grid."""
@@ -97,7 +113,7 @@ class Map:
             start = self.vertexes[linedef.start_vertex]
             end = self.vertexes[linedef.end_vertex]
 
-            #if linedef.flags & LdFlags.ML_DONTDRAW:
+            # if linedef.flags & LdFlags.ML_DONTDRAW:
             #    type = "hidden"
             if linedef.front_sidedef == -1 or linedef.back_sidedef == -1:
                 type = "one-sided"
