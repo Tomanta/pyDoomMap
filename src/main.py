@@ -17,22 +17,27 @@ def export_map(wadfile, mapname, export_file):
     wr = WadReader(wadfile)
 
     d_map = wr.maps[mapname]
-    offset_x, offset_y = d_map.get_offsets()
     limit_x, limit_y = d_map.get_limits()
 
     padding = 100
 
-    out = Image.new(
-        "RGB", (limit_x + (padding * 2), limit_y + (padding * 2)), (0, 0, 0)
-    )
-    draw = ImageDraw.Draw(out)
+    img_size_x = limit_x + (padding * 2)
+    img_size_y = limit_y + (padding * 2)
 
-    for linedef in d_map.linedefs:
-        start_vert = d_map.vertexes[linedef.start_vertex]
-        end_vert = d_map.vertexes[linedef.end_vertex]
-        s = (start_vert.x + offset_x + padding, start_vert.y + offset_y + padding)
-        e = (end_vert.x + offset_x + padding, end_vert.y + offset_y + padding)
-        draw.line([s, e], fill="rgb(255,255,255)", width=2)
+    out = Image.new("RGB", (img_size_x, img_size_y), (0, 0, 0))
+    image = ImageDraw.Draw(out)
+
+    for line in d_map.get_lines(use_offsets=True, padding=100):
+        image.line(
+            [
+                line.start_vertex[0],
+                img_size_y - 1 - line.start_vertex[1],
+                line.end_vertex[0],
+                img_size_y - 1 - line.end_vertex[1],
+            ],
+            fill="rgb(255,255,255)",
+            width=5,
+        )
 
     out.save(export_file)
 
@@ -40,5 +45,4 @@ def export_map(wadfile, mapname, export_file):
 
 
 if __name__ == "__main__":
-    click.echo("testing")
     cli()

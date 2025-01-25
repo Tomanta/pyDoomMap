@@ -18,6 +18,13 @@ class Linedef:
     back_sidedef: int
 
 
+@dataclass
+class Line:
+    start_vertex: tuple[int, int]
+    end_vertex: tuple[int, int]
+    type: str
+
+
 class Map:
     def __init__(self, name: str, vertexes: list, linedefs: list):
         self.name = name
@@ -36,10 +43,36 @@ class Map:
 
         return (abs(min_x), abs(min_y))
 
+    def get_lines(self, use_offsets: bool = True, padding: int = 0) -> list[Line]:
+        if use_offsets:
+            offset_x, offset_y = self.get_offsets()
+        else:
+            offset_x = 0
+            offset_y = 0
+
+        type = "standard"
+        lines = []
+
+        for linedef in self.linedefs:
+            start = self.vertexes[linedef.start_vertex]
+            end = self.vertexes[linedef.end_vertex]
+            lines.append(
+                Line(
+                    start_vertex=(
+                        start.x + offset_x + padding,
+                        start.y + offset_y + padding,
+                    ),
+                    end_vertex=(end.x + offset_x + padding, end.y + offset_y + padding),
+                    type=type,
+                )
+            )
+        return lines
+
     def get_limits(self):
+        """Get the extreme edges of the map"""
         offset_x, offset_y = self.get_offsets()
-        max_x = 0
-        max_y = 0
+        max_x = float("-inf")
+        max_y = float("-inf")
         for v in self.vertexes:
             if v.x > max_x:
                 max_x = v.x
