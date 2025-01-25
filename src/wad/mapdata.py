@@ -19,7 +19,7 @@ class LdFlags(IntFlag):
 @dataclass
 class Thing:
     x_pos: int
-    y_post: int
+    y_pos: int
     angle: int
     type: int
     flags: int
